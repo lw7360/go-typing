@@ -14,17 +14,19 @@ const (
 
 var curScreen = MainScreen
 
+const colDef = termbox.ColorDefault
+
 func redrawAll() {
-	const colDef = termbox.ColorDefault
 	termbox.Clear(colDef, colDef)
 	// width, height := termbox.Size()
 }
 
-func drawMainScreen(defaul_fg termbox.Attribute, default_bg termbox.Attribute) {
+func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) {
+	termbox.Clear(colDef, colDef)
 }
 
 func drawAboutScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	termbox.Clear(colDef, colDef)
 	width, height := termbox.Size()
 	template := [...]string{"GoTyping"}
 
