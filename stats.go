@@ -26,5 +26,8 @@ func (s *Stats) saveStats(filename string) bool {
 }
 
 func (s *Stats) wpm() float64 {
+	if s.seconds == 0 {
+		return 0
+	}
 	return float64(s.words / s.seconds / 60)
 }
