@@ -15,11 +15,12 @@ func shuffle(a []string) {
 }
 
 type Game struct {
-	wordList  string    // String containing all words
-	curChar   int       // Index of current char
-	curStats  Stats     // Stats for current session
-	stats     Stats     // Stats for current session + all past sessions
-	startTime time.Time // Start time of current session
+	wordList  string           // String containing all words
+	curInd    int              // Index of current char
+	errMap    map[int]struct{} // Map of indexes with errors. Empty struct as value saves space!
+	curStats  Stats            // Stats for current session
+	stats     Stats            // Stats for current session + all past sessions
+	startTime time.Time        // Start time of current session
 }
 
 func (g *Game) loadWords(filename string) bool {
@@ -62,5 +63,6 @@ func NewGame(wordsFile string, statsFile string) *Game {
 	if !g.loadStats(statsFile) {
 		panic("Failed to load statsFile: \"" + statsFile + "\"")
 	}
+	g.errMap = make(map[int]struct{})
 	return g
 }
