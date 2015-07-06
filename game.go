@@ -55,6 +55,22 @@ func (g *Game) getRune(index int) rune {
 	return rune(g.wordList[index])
 }
 
+func (g *Game) noErr(index int) bool {
+	splitWords := g.wordList[0:index]
+	lastIndex := strings.LastIndex(splitWords, " ")
+	if lastIndex == -1 {
+		return true
+	} else {
+		for i := lastIndex; i < index; i++ {
+			_, err := g.errMap[i]
+			if err {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func NewGame(wordsFile string, statsFile string) *Game {
 	g := new(Game)
 	if !g.loadWords(wordsFile) {
