@@ -2,25 +2,39 @@ package main
 
 import (
 	"io/ioutil"
+	"math/rand"
 	"strings"
 	"time"
 )
 
+func shuffle(a []string) {
+	for i := range a {
+		j := rand.Intn(i + 1)
+		a[i], a[j] = a[j], a[i]
+	}
+}
+
 type Game struct {
-	wordList  []string  // Slice of words to practice
+	wordList  string    // String containing all words
+	curChar   int       // Index of current char
 	curStats  Stats     // Stats for current session
 	stats     Stats     // Stats for current session + all past sessions
-	curWord   int       // Index of current word in wordList
-	curChar   int       // Index of current char of current word
 	startTime time.Time // Start time of current session
 }
 
 func (g *Game) loadWords(filename string) bool {
+	rand.Seed(time.Now().UnixNano())
+
 	words, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return false
 	}
-	g.wordList = strings.Split(string(words), "\n")
+
+	wordSlice := strings.Split(string(words), "\n")
+	shuffle(wordSlice)
+
+	g.wordList = strings.Join(wordSlice, " ")
+
 	return true
 }
 
@@ -34,6 +48,10 @@ func (g *Game) initTime() {
 
 func (g *Game) gameTime() float64 {
 	return time.Since(g.startTime).Seconds()
+}
+
+func (g *Game) getRune(index int) rune {
+	return rune(g.wordList[index])
 }
 
 func NewGame(wordsFile string, statsFile string) *Game {
