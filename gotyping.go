@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/nsf/termbox-go"
 	"os"
+	"strconv"
 )
 
 type DisplayScreen int
@@ -17,6 +18,7 @@ const (
 var curScreen = MainScreen
 
 const colDef = termbox.ColorDefault
+const colErr = termbox.ColorRed
 
 func drawCentered(default_fg termbox.Attribute, default_bg termbox.Attribute, template []string) {
 	termbox.Clear(colDef, colDef)
@@ -28,9 +30,7 @@ func drawCentered(default_fg termbox.Attribute, default_bg termbox.Attribute, te
 		for index_x, runeValue := range line {
 			displayRune := ' '
 			if runeValue != ' ' {
-				if runeValue != '#' {
-					displayRune = runeValue
-				}
+				displayRune = runeValue
 			}
 			termbox.SetCell(start_x+index_x-lineLength/2, start_y+index_y, displayRune, default_fg, default_bg)
 		}
@@ -40,18 +40,56 @@ func drawCentered(default_fg termbox.Attribute, default_bg termbox.Attribute, te
 
 func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) {
 	template := []string{
-		"GoTyping.",
+		"GoTyping",
 		"",
-		"1: Practice",
-		"2: Stats",
-		"3: About",
+		"[1] Practice",
+		"[2] Stats   ",
+		"[3] About   ",
+		"",
+		"[Esc] to quit",
+		"[h] for help",
 	}
 	drawCentered(default_fg, default_bg, template)
 }
 
-func drawGameScreen(default_fg termbox.Attribute, default_bg termbox.Attribute, curGame Game) {
-	template := []string{"INGAME"}
-	drawCentered(default_fg, default_bg, template)
+func statsString(curGame *Game) string {
+	curStats := curGame.curStats
+
+	words := strconv.Itoa(curStats.words)
+	errors := strconv.Itoa(curStats.errors)
+	wpm := strconv.Itoa(int(curStats.wpm()))
+
+	statsString := "Words: " + words + " | Errors: " + errors + " | WPM: " + wpm + " | [Esc] to quit"
+
+	return statsString
+}
+
+func drawGameScreen(default_fg termbox.Attribute, default_bg termbox.Attribute, curGame *Game) {
+	termbox.Clear(colDef, colDef)
+
+	width, height := termbox.Size()
+	i := 0
+	for y := 0; y < height-2; y = y + 2 {
+		for x := 0; x < width; x++ {
+			fg, bg := default_fg, default_bg
+			if i == curGame.curChar {
+				termbox.SetCursor(x, y)
+			}
+
+			displayRune := curGame.getRune(i)
+			i++
+			termbox.SetCell(x, y, displayRune, fg, bg)
+		}
+	}
+
+	for x := 0; x < width; x++ {
+		termbox.SetCell(x, height-2, '_', default_fg, default_bg)
+	}
+	statsString := statsString(curGame)
+	for x := 0; x < len(statsString); x++ {
+		termbox.SetCell(x, height-1, rune(statsString[x]), termbox.ColorGreen, default_bg)
+	}
+	termbox.Flush()
 }
 
 func drawStatsScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) {
@@ -93,7 +131,6 @@ mainloop:
 			drawMainScreen(fgColor, bgColor)
 		case GameScreen:
 			curGame := NewGame(wordsFile, statsFile)
-			curGame.loadStats(statsFile)
 
 		gameloop:
 			for {
