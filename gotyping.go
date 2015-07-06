@@ -55,6 +55,8 @@ func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) 
 
 func statsString(curGame *Game) string {
 	curStats := curGame.curStats
+	// TODO: Time/WPM is broken
+	curStats.seconds = int(curGame.gameTime())
 
 	words := strconv.Itoa(curStats.words)
 	errors := strconv.Itoa(curStats.errors)
@@ -78,7 +80,7 @@ func drawGameScreen(default_fg termbox.Attribute, default_bg termbox.Attribute, 
 			}
 			_, err := curGame.errMap[i]
 			if err {
-				fg = colErr
+				bg = colErr
 			}
 
 			displayRune := curGame.getRune(i)
@@ -137,22 +139,26 @@ mainloop:
 		case GameScreen:
 			curGame := NewGame(wordsFile, statsFile)
 
+			furthestInd := 0
 		gameloop:
 			for {
 				drawGameScreen(fgColor, bgColor, curGame)
 
 				ev := termbox.PollEvent()
+				curGame.initTime()
 
 				switch ev.Key {
 				case termbox.KeyEsc:
 					curScreen = MainScreen
 					continue mainloop
-				case termbox.KeyBackspace, termbox.KeyBackspace2, termbox.KeyArrowLeft:
+				case termbox.KeyBackspace, termbox.KeyBackspace2:
 					curGame.curInd--
 					if curGame.curInd < 0 {
 						curGame.curInd = 0
 					}
 					continue gameloop
+				case termbox.KeySpace:
+					ev.Ch = ' '
 				}
 
 				curInd := curGame.curInd
@@ -160,11 +166,15 @@ mainloop:
 
 				if ev.Ch != curChar {
 					curGame.errMap[curInd] = struct{}{}
+					curGame.curStats.errors++
 				} else {
 					delete(curGame.errMap, curInd)
+					if curChar == ' ' && curInd > furthestInd && curGame.noErr(curInd) {
+						furthestInd = curInd
+						curGame.curStats.words++
+					}
 				}
 				curGame.curInd++
-
 			}
 		case StatsScreen:
 			drawStatsScreen(fgColor, bgColor)
