@@ -2,9 +2,7 @@ package main
 
 import (
 	"github.com/nsf/termbox-go"
-	"io/ioutil"
 	"os"
-	"strings"
 )
 
 type DisplayScreen int
@@ -19,22 +17,6 @@ const (
 var curScreen = MainScreen
 
 const colDef = termbox.ColorDefault
-
-var wordList = []string{}
-
-func loadWords(filename string) bool {
-	words, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return false
-	}
-	wordList = strings.Split(string(words), "\n")
-	return true
-}
-
-func redrawAll() {
-	termbox.Clear(colDef, colDef)
-	// width, height := termbox.Size()
-}
 
 func drawCentered(default_fg termbox.Attribute, default_bg termbox.Attribute, template []string) {
 	termbox.Clear(colDef, colDef)
@@ -67,7 +49,7 @@ func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) 
 	drawCentered(default_fg, default_bg, template)
 }
 
-func drawGameScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) {
+func drawGameScreen(default_fg termbox.Attribute, default_bg termbox.Attribute, curGame Game) {
 	template := []string{"INGAME"}
 	drawCentered(default_fg, default_bg, template)
 }
@@ -92,26 +74,44 @@ func main() {
 
 	// load wordList
 	args := os.Args[1:]
-	filename := "words.txt"
+	wordsFile := "words.txt"
+	statsFile := "stats.json"
 	if len(args) > 0 {
-		filename = args[0]
+		wordsFile = args[0]
+		if len(args) > 1 {
+			statsFile = args[1]
+		}
 	}
-	if !loadWords(filename) {
-		panic("Failed to load: " + filename)
-	}
+
+	fgColor := termbox.ColorWhite
+	bgColor := termbox.ColorDefault
 
 mainloop:
 	for {
 		switch curScreen {
 		case MainScreen:
-			drawMainScreen(termbox.ColorWhite, termbox.ColorDefault)
+			drawMainScreen(fgColor, bgColor)
 		case GameScreen:
-			drawGameScreen(termbox.ColorWhite, termbox.ColorDefault)
+			curGame := NewGame(wordsFile, statsFile)
+			curGame.loadStats(statsFile)
+
+		gameloop:
+			for {
+				drawGameScreen(fgColor, bgColor, curGame)
+
+				ev := termbox.PollEvent()
+				if ev.Key == termbox.KeyEsc {
+					curScreen = MainScreen
+					drawMainScreen(fgColor, bgColor)
+					break gameloop
+				}
+			}
 		case StatsScreen:
-			drawStatsScreen(termbox.ColorWhite, termbox.ColorDefault)
+			drawStatsScreen(fgColor, bgColor)
 		case AboutScreen:
-			drawAboutScreen(termbox.ColorWhite, termbox.ColorDefault)
+			drawAboutScreen(fgColor, bgColor)
 		}
+
 		ev := termbox.PollEvent()
 		switch ev.Key {
 		case termbox.KeyEsc:
@@ -119,14 +119,18 @@ mainloop:
 				break mainloop
 			}
 			curScreen = MainScreen
+			continue
 		}
-		switch ev.Ch {
-		case '1':
-			curScreen = GameScreen
-		case '2':
-			curScreen = StatsScreen
-		case '3':
-			curScreen = AboutScreen
+		switch curScreen {
+		case MainScreen:
+			switch ev.Ch {
+			case '1':
+				curScreen = GameScreen
+			case '2':
+				curScreen = StatsScreen
+			case '3':
+				curScreen = AboutScreen
+			}
 		}
 	}
 }
