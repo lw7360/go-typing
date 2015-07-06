@@ -22,6 +22,7 @@ const colErr = termbox.ColorRed
 
 func drawCentered(default_fg termbox.Attribute, default_bg termbox.Attribute, template []string) {
 	termbox.Clear(colDef, colDef)
+	termbox.HideCursor()
 	width, height := termbox.Size()
 	start_x := (width) / 2
 	start_y := (height - len(template)) / 2
@@ -72,8 +73,12 @@ func drawGameScreen(default_fg termbox.Attribute, default_bg termbox.Attribute, 
 	for y := 0; y < height-2; y = y + 2 {
 		for x := 0; x < width; x++ {
 			fg, bg := default_fg, default_bg
-			if i == curGame.curChar {
+			if i == curGame.curInd {
 				termbox.SetCursor(x, y)
+			}
+			_, err := curGame.errMap[i]
+			if err {
+				fg = colErr
 			}
 
 			displayRune := curGame.getRune(i)
@@ -137,11 +142,29 @@ mainloop:
 				drawGameScreen(fgColor, bgColor, curGame)
 
 				ev := termbox.PollEvent()
-				if ev.Key == termbox.KeyEsc {
+
+				switch ev.Key {
+				case termbox.KeyEsc:
 					curScreen = MainScreen
-					drawMainScreen(fgColor, bgColor)
-					break gameloop
+					continue mainloop
+				case termbox.KeyBackspace, termbox.KeyBackspace2, termbox.KeyArrowLeft:
+					curGame.curInd--
+					if curGame.curInd < 0 {
+						curGame.curInd = 0
+					}
+					continue gameloop
 				}
+
+				curInd := curGame.curInd
+				curChar := curGame.getRune(curInd)
+
+				if ev.Ch != curChar {
+					curGame.errMap[curInd] = struct{}{}
+				} else {
+					delete(curGame.errMap, curInd)
+				}
+				curGame.curInd++
+
 			}
 		case StatsScreen:
 			drawStatsScreen(fgColor, bgColor)
