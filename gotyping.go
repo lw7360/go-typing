@@ -56,10 +56,10 @@ func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) 
 func statsString(curGame *Game) string {
 	curStats := curGame.curStats
 	// TODO: Time/WPM is broken
-	curStats.seconds = int(curGame.gameTime())
+	curStats.Seconds = int(curGame.gameTime())
 
-	words := strconv.Itoa(curStats.words)
-	errors := strconv.Itoa(curStats.errors)
+	words := strconv.Itoa(curStats.Words)
+	errors := strconv.Itoa(curStats.Errors)
 	wpm := strconv.Itoa(int(curStats.wpm()))
 
 	statsString := "Words: " + words + " | Errors: " + errors + " | WPM: " + wpm + " | [Esc] to quit"
@@ -149,6 +149,7 @@ mainloop:
 
 				switch ev.Key {
 				case termbox.KeyEsc:
+					curGame.curStats.saveStats(statsFile)
 					curScreen = MainScreen
 					continue mainloop
 				case termbox.KeyBackspace, termbox.KeyBackspace2:
@@ -166,12 +167,12 @@ mainloop:
 
 				if ev.Ch != curChar {
 					curGame.errMap[curInd] = struct{}{}
-					curGame.curStats.errors++
+					curGame.curStats.Errors++
 				} else {
 					delete(curGame.errMap, curInd)
 					if curChar == ' ' && curInd > furthestInd && curGame.noErr(curInd) {
 						furthestInd = curInd
-						curGame.curStats.words++
+						curGame.curStats.Words++
 					}
 				}
 				curGame.curInd++
