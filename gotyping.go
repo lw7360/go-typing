@@ -123,9 +123,6 @@ func main() {
 	statsFile := "stats.json"
 	if len(args) > 0 {
 		wordsFile = args[0]
-		if len(args) > 1 {
-			statsFile = args[1]
-		}
 	}
 
 	fgColor := termbox.ColorWhite
