@@ -6,18 +6,22 @@ import (
 )
 
 type Stats struct {
-	Words    int
-	Seconds  int
-	Errors   int
-	Wordlist string
+	Words   int
+	Seconds int
+	Errors  int
 }
 
 func (s *Stats) loadStats(filename string) bool {
 	// TODO: Implement Later
-	s.Words = 10
-	s.Seconds = 11
-	s.Errors = 12
-	s.Wordlist = "words.txt"
+	statsFile, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(statsFile, s)
+	if err != nil {
+		panic(err)
+	}
 
 	return true
 }
