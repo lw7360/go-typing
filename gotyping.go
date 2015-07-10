@@ -55,7 +55,7 @@ func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) 
 
 func statsString(curGame *Game) string {
 	curStats := &curGame.curStats
-	curStats.Seconds = int(curGame.gameTime())
+	curStats.Seconds = curGame.gameTime()
 
 	words := strconv.Itoa(curStats.Words)
 	errors := strconv.Itoa(curStats.Errors)

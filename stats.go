@@ -7,7 +7,7 @@ import (
 
 type Stats struct {
 	Words   int
-	Seconds int
+	Seconds float64
 	Errors  int
 }
 
