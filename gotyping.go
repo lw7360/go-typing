@@ -54,7 +54,7 @@ func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) 
 }
 
 func statsString(curGame *Game) string {
-	curStats := curGame.curStats
+	curStats := &curGame.curStats
 	// TODO: Time/WPM is broken
 	curStats.Seconds = int(curGame.gameTime())
 
@@ -135,6 +135,7 @@ mainloop:
 			drawMainScreen(fgColor, bgColor)
 		case GameScreen:
 			curGame := NewGame(wordsFile, statsFile)
+			curGame.initTime()
 
 			furthestInd := 0
 		gameloop:
@@ -142,7 +143,6 @@ mainloop:
 				drawGameScreen(fgColor, bgColor, curGame)
 
 				ev := termbox.PollEvent()
-				curGame.initTime()
 
 				switch ev.Key {
 				case termbox.KeyEsc:

@@ -53,7 +53,9 @@ func (g *Game) saveStats(filename string) bool {
 }
 
 func (g *Game) initTime() {
-	g.startTime = time.Now()
+	if g.startTime.IsZero() {
+		g.startTime = time.Now()
+	}
 }
 
 func (g *Game) gameTime() float64 {
