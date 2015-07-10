@@ -55,7 +55,6 @@ func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) 
 
 func statsString(curGame *Game) string {
 	curStats := &curGame.curStats
-	// TODO: Time/WPM is broken
 	curStats.Seconds = int(curGame.gameTime())
 
 	words := strconv.Itoa(curStats.Words)

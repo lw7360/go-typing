@@ -38,5 +38,5 @@ func (s *Stats) wpm() int {
 	if s.Seconds == 0 {
 		return 0
 	}
-	return s.Words / s.Seconds / 60
+	return int(float64(s.Words) / float64(s.Seconds) * 60.0)
 }
