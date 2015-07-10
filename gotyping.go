@@ -146,7 +146,7 @@ mainloop:
 
 				switch ev.Key {
 				case termbox.KeyEsc:
-					curGame.curStats.saveStats(statsFile)
+					curGame.saveStats(statsFile)
 					curScreen = MainScreen
 					continue mainloop
 				case termbox.KeyBackspace, termbox.KeyBackspace2:

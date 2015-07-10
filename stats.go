@@ -12,7 +12,6 @@ type Stats struct {
 }
 
 func (s *Stats) loadStats(filename string) bool {
-	// TODO: Implement Later
 	statsFile, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
@@ -27,7 +26,6 @@ func (s *Stats) loadStats(filename string) bool {
 }
 
 func (s *Stats) saveStats(filename string) bool {
-	// TODO: Implement Later
 	statsJson, err := json.Marshal(s)
 	if err != nil {
 		panic(err)

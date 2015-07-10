@@ -43,6 +43,15 @@ func (g *Game) loadStats(filename string) bool {
 	return g.stats.loadStats(filename)
 }
 
+func (g *Game) saveStats(filename string) bool {
+	totalStats := new(Stats)
+	totalStats.Words = g.stats.Words + g.curStats.Words
+	totalStats.Seconds = g.stats.Seconds + g.curStats.Seconds
+	totalStats.Errors = g.stats.Errors + g.curStats.Errors
+
+	return totalStats.saveStats(filename)
+}
+
 func (g *Game) initTime() {
 	g.startTime = time.Now()
 }
