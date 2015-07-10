@@ -14,12 +14,12 @@ type Stats struct {
 func (s *Stats) loadStats(filename string) bool {
 	statsFile, err := ioutil.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		return false
 	}
 
 	err = json.Unmarshal(statsFile, s)
 	if err != nil {
-		panic(err)
+		return false
 	}
 
 	return true

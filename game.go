@@ -87,9 +87,8 @@ func NewGame(wordsFile string, statsFile string) *Game {
 	if !g.loadWords(wordsFile) {
 		panic("Failed to load wordsFile: \"" + wordsFile + "\"")
 	}
-	if !g.loadStats(statsFile) {
-		panic("Failed to load statsFile: \"" + statsFile + "\"")
-	}
+	g.loadStats(statsFile)
+
 	g.errMap = make(map[int]struct{})
 	return g
 }
