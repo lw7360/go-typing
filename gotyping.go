@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/nsf/termbox-go"
 	"os"
-	"strconv"
 )
 
 type DisplayScreen int
@@ -53,56 +52,6 @@ func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) 
 	drawCentered(default_fg, default_bg, template)
 }
 
-func statsString(curGame *Game) string {
-	curStats := &curGame.curStats
-	curStats.Seconds = curGame.gameTime()
-
-	words := strconv.Itoa(curStats.Words)
-	errors := strconv.Itoa(curStats.Errors)
-	wpm := strconv.Itoa(int(curStats.wpm()))
-
-	statsString := "Words: " + words + " | Errors: " + errors + " | WPM: " + wpm + " | [Esc] to quit"
-
-	return statsString
-}
-
-func drawGameScreen(default_fg termbox.Attribute, default_bg termbox.Attribute, curGame *Game) {
-	termbox.Clear(colDef, colDef)
-
-	width, height := termbox.Size()
-	i := 0
-	for y := 0; y < height-2; y = y + 2 {
-		for x := 0; x < width; x++ {
-			fg, bg := default_fg, default_bg
-			if i == curGame.curInd {
-				termbox.SetCursor(x, y)
-			}
-			_, err := curGame.errMap[i]
-			if err {
-				bg = colErr
-			}
-
-			displayRune := curGame.getRune(i)
-			i++
-			termbox.SetCell(x, y, displayRune, fg, bg)
-		}
-	}
-
-	for x := 0; x < width; x++ {
-		termbox.SetCell(x, height-2, '_', default_fg, default_bg)
-	}
-	statsString := statsString(curGame)
-	for x := 0; x < len(statsString); x++ {
-		termbox.SetCell(x, height-1, rune(statsString[x]), termbox.ColorGreen, default_bg)
-	}
-	termbox.Flush()
-}
-
-func drawStatsScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) {
-	template := []string{"Stats"}
-	drawCentered(default_fg, default_bg, template)
-}
-
 func drawAboutScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) {
 	template := []string{"About GoTyping"}
 	drawCentered(default_fg, default_bg, template)
@@ -124,6 +73,8 @@ func main() {
 		wordsFile = args[0]
 	}
 
+	curGame := NewGame(wordsFile, statsFile)
+
 	fgColor := termbox.ColorWhite
 	bgColor := termbox.ColorDefault
 
@@ -133,10 +84,9 @@ mainloop:
 		case MainScreen:
 			drawMainScreen(fgColor, bgColor)
 		case GameScreen:
-			curGame := NewGame(wordsFile, statsFile)
 			curGame.initTime()
-
 			furthestInd := 0
+
 		gameloop:
 			for {
 				drawGameScreen(fgColor, bgColor, curGame)
@@ -174,7 +124,20 @@ mainloop:
 				curGame.curInd++
 			}
 		case StatsScreen:
-			drawStatsScreen(fgColor, bgColor)
+			drawStatsScreen(fgColor, bgColor, curGame)
+			ev := termbox.PollEvent()
+			switch ev.Key {
+			case termbox.KeyEsc:
+				curScreen = MainScreen
+				continue mainloop
+			}
+			switch ev.Ch {
+			case 'r':
+				curGame.curStats.reset()
+				curGame.stats.reset()
+				curGame.saveStats(statsFile)
+				continue mainloop
+			}
 		case AboutScreen:
 			drawAboutScreen(fgColor, bgColor)
 		}

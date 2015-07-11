@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"math"
 	"math/rand"
 	"strings"
 	"time"
@@ -34,7 +35,7 @@ func (g *Game) loadWords(filename string) bool {
 	wordSlice := strings.Split(string(words), "\n")
 	shuffle(wordSlice)
 
-	g.wordList = strings.Join(wordSlice, " ")
+	g.wordList = strings.Join(wordSlice, " ") + " "
 
 	return true
 }
@@ -53,9 +54,7 @@ func (g *Game) saveStats(filename string) bool {
 }
 
 func (g *Game) initTime() {
-	if g.startTime.IsZero() {
-		g.startTime = time.Now()
-	}
+	g.startTime = time.Now()
 }
 
 func (g *Game) gameTime() float64 {
@@ -63,10 +62,17 @@ func (g *Game) gameTime() float64 {
 }
 
 func (g *Game) getRune(index int) rune {
+	if index >= len(g.wordList) {
+		index = int(math.Mod(float64(index), float64(len(g.wordList))))
+	}
 	return rune(g.wordList[index])
 }
 
 func (g *Game) noErr(index int) bool {
+	if index >= len(g.wordList) {
+		index = int(math.Mod(float64(index), float64(len(g.wordList))))
+	}
+
 	splitWords := g.wordList[0:index]
 	lastIndex := strings.LastIndex(splitWords, " ")
 	if lastIndex == -1 {

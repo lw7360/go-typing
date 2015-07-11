@@ -40,3 +40,9 @@ func (s *Stats) wpm() int {
 	}
 	return int(float64(s.Words) / float64(s.Seconds) * 60.0)
 }
+
+func (s *Stats) reset() {
+	s.Words = 0
+	s.Seconds = 0
+	s.Errors = 0
+}
