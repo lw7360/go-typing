@@ -73,7 +73,7 @@ func main() {
 		wordsFile = args[0]
 	}
 
-	curGame := NewGame(wordsFile, statsFile)
+	var curGame *Game
 
 	fgColor := termbox.ColorWhite
 	bgColor := termbox.ColorDefault
@@ -84,7 +84,7 @@ mainloop:
 		case MainScreen:
 			drawMainScreen(fgColor, bgColor)
 		case GameScreen:
-			curGame.initTime()
+			curGame = NewGame(wordsFile, statsFile)
 			furthestInd := 0
 
 		gameloop:
@@ -92,12 +92,14 @@ mainloop:
 				drawGameScreen(fgColor, bgColor, curGame)
 
 				ev := termbox.PollEvent()
+				curGame.initTime()
 
 				switch ev.Key {
 				case termbox.KeyEsc:
 					curGame.saveStats(statsFile)
 					curScreen = MainScreen
-					continue mainloop
+					drawMainScreen(fgColor, bgColor)
+					break gameloop
 				case termbox.KeyBackspace, termbox.KeyBackspace2:
 					curGame.curInd--
 					if curGame.curInd < 0 {
