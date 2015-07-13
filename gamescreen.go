@@ -29,8 +29,7 @@ func drawGameScreen(default_fg termbox.Attribute, default_bg termbox.Attribute, 
 			if i == curGame.curInd {
 				termbox.SetCursor(x, y)
 			}
-			_, err := curGame.errMap[i]
-			if err {
+			if curGame.indexHasErr(i) {
 				bg = colErr
 			}
 
