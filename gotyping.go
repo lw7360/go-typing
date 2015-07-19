@@ -85,6 +85,7 @@ mainloop:
 			drawMainScreen(fgColor, bgColor)
 		case GameScreen:
 			curGame = NewGame(wordsFile, statsFile)
+			furthestInd := 0
 
 		gameloop:
 			for {
@@ -113,11 +114,12 @@ mainloop:
 				curChar := curGame.getRune(curInd)
 
 				if ev.Ch != curChar {
-					curGame.setErr(curInd, true)
+					curGame.errMap[curInd] = struct{}{}
 					curGame.curStats.Errors++
 				} else {
-					curGame.setErr(curInd, false)
-					if curChar == ' ' && curGame.noErr(curInd) {
+					delete(curGame.errMap, curInd)
+					if curChar == ' ' && curInd > furthestInd && curGame.noErr(curInd) {
+						furthestInd = curInd
 						curGame.curStats.Words++
 					}
 				}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"math"
 	"math/rand"
 	"strings"
 	"time"
@@ -14,17 +15,13 @@ func shuffle(a []string) {
 	}
 }
 
-type Word struct {
-	word   string
-	errMap map[int]struct{}
-}
-
 type Game struct {
-	wordList  []Word    // Slice of all Words
-	curInd    int       // Index of current char
-	curStats  Stats     // Stats for current session
-	stats     Stats     // Stats for current session + all past sessions
-	startTime time.Time // Start time of current session
+	wordList  string           // String containing all words
+	curInd    int              // Index of current char
+	errMap    map[int]struct{} // Map of indexes with errors. Empty struct as value saves space!
+	curStats  Stats            // Stats for current session
+	stats     Stats            // Stats for current session + all past sessions
+	startTime time.Time        // Start time of current session
 }
 
 func (g *Game) loadWords(filename string) bool {
@@ -38,9 +35,7 @@ func (g *Game) loadWords(filename string) bool {
 	wordSlice := strings.Split(string(words), "\n")
 	shuffle(wordSlice)
 
-	for _, word := range wordSlice {
-		g.wordList = append(g.wordList, Word{word, make(map[int]struct{})})
-	}
+	g.wordList = strings.Join(wordSlice, " ") + " "
 
 	return true
 }
@@ -69,62 +64,30 @@ func (g *Game) gameTime() float64 {
 }
 
 func (g *Game) getRune(index int) rune {
-	curIndex := 0
-	for _, word := range g.wordList {
-		for _, char := range word.word {
-			if curIndex == index {
-				return char
-			}
-			curIndex++
-		}
-		if curIndex == index { // Adds a space inbetween words
-			return ' '
-		}
-		curIndex++
+	if index >= len(g.wordList) {
+		index = int(math.Mod(float64(index), float64(len(g.wordList))))
+	}
+	return rune(g.wordList[index])
+}
+
+func (g *Game) noErr(index int) bool {
+	if index >= len(g.wordList) {
+		index = int(math.Mod(float64(index), float64(len(g.wordList))))
 	}
 
-	return g.getRune(index - curIndex) // Recurse if we run out of words
-}
-
-func (g *Game) getWordAndIndex(index int) (word Word, curWordInd int) {
-	curIndex := 0
-
-	for _, word := range g.wordList {
-		for i, _ := range word.word {
-			curWordInd = i
-			if curIndex == index {
-				return word, curWordInd
-			}
-			curIndex++
-		}
-		curWordInd++
-		if curIndex == index {
-			return word, curWordInd
-		}
-		curIndex++
-	}
-
-	return g.getWordAndIndex(index - curIndex)
-}
-
-func (g *Game) noErr(index int) bool { // Checks if word at index has any errors.
-	curWord, _ := g.getWordAndIndex(index)
-	return len(curWord.errMap) == 0
-}
-
-func (g *Game) indexHasErr(index int) bool {
-	curWord, curWordInd := g.getWordAndIndex(index)
-	_, ok := curWord.errMap[curWordInd]
-	return ok
-}
-
-func (g *Game) setErr(index int, val bool) {
-	curWord, curInd := g.getWordAndIndex(index)
-	if val {
-		curWord.errMap[curInd] = struct{}{}
+	splitWords := g.wordList[0:index]
+	lastIndex := strings.LastIndex(splitWords, " ")
+	if lastIndex == -1 {
+		return true
 	} else {
-		delete(curWord.errMap, curInd)
+		for i := lastIndex; i < index; i++ {
+			_, err := g.errMap[i]
+			if err {
+				return false
+			}
+		}
 	}
+	return true
 }
 
 func NewGame(wordsFile string, statsFile string) *Game {
@@ -134,5 +97,6 @@ func NewGame(wordsFile string, statsFile string) *Game {
 	}
 	g.loadStats(statsFile)
 
+	g.errMap = make(map[int]struct{})
 	return g
 }
