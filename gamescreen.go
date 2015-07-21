@@ -11,7 +11,7 @@ func statsString(curGame *Game) string {
 
 	words := strconv.Itoa(curStats.Words)
 	errors := strconv.Itoa(curStats.Errors)
-	wpm := strconv.Itoa(int(curStats.wpm()))
+	wpm := strconv.Itoa(curStats.Wpm)
 
 	statsString := "Words: " + words + " | Errors: " + errors + " | WPM: " + wpm + " | [Esc] to quit"
 

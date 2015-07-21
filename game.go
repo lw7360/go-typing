@@ -49,6 +49,7 @@ func (g *Game) saveStats(filename string) bool {
 	totalStats.Words = g.stats.Words + g.curStats.Words
 	totalStats.Seconds = g.stats.Seconds + g.curStats.Seconds
 	totalStats.Errors = g.stats.Errors + g.curStats.Errors
+	totalStats.Wpm = totalStats.wpm()
 
 	return totalStats.saveStats(filename)
 }
@@ -96,6 +97,7 @@ func NewGame(wordsFile string, statsFile string) *Game {
 		panic("Failed to load wordsFile: \"" + wordsFile + "\"")
 	}
 	g.loadStats(statsFile)
+	g.curStats.reset()
 
 	g.errMap = make(map[int]struct{})
 	return g

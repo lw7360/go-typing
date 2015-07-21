@@ -9,6 +9,7 @@ type Stats struct {
 	Words   int
 	Seconds float64
 	Errors  int
+	Wpm     int
 }
 
 func (s *Stats) loadStats(filename string) bool {
@@ -45,4 +46,5 @@ func (s *Stats) reset() {
 	s.Words = 0
 	s.Seconds = 0
 	s.Errors = 0
+	s.Wpm = 0
 }

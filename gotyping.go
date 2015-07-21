@@ -47,13 +47,17 @@ func drawMainScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) 
 		"[3] About   ",
 		"",
 		"[Esc] to quit",
-		"[h] for help",
 	}
 	drawCentered(default_fg, default_bg, template)
 }
 
 func drawAboutScreen(default_fg termbox.Attribute, default_bg termbox.Attribute) {
-	template := []string{"About GoTyping"}
+	template := []string{
+		"About GoTyping",
+		"",
+		"Typing Practice in your Terminal",
+		"https://github.com/lw7360/gotyping",
+	}
 	drawCentered(default_fg, default_bg, template)
 }
 
@@ -74,6 +78,7 @@ func main() {
 	}
 
 	var curGame *Game
+	curGame = NewGame(wordsFile, statsFile)
 
 	fgColor := termbox.ColorWhite
 	bgColor := termbox.ColorDefault
@@ -121,6 +126,7 @@ mainloop:
 					if curChar == ' ' && curInd > furthestInd && curGame.noErr(curInd) {
 						furthestInd = curInd
 						curGame.curStats.Words++
+						curGame.curStats.Wpm = curGame.curStats.wpm()
 					}
 				}
 				curGame.curInd++
