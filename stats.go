@@ -36,10 +36,10 @@ func (s *Stats) saveStats(filename string) bool {
 }
 
 func (s *Stats) wpm() int {
-	if s.Seconds == 0 {
+	if int(s.Seconds) == 0 {
 		return 0
 	}
-	return int(float64(s.Words) / float64(s.Seconds) * 60.0)
+	return int(float64(s.Words) / s.Seconds * 60.0)
 }
 
 func (s *Stats) reset() {

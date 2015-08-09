@@ -10,13 +10,14 @@ func drawStatsScreen(default_fg termbox.Attribute, default_bg termbox.Attribute,
 	totalStats.Words = curGame.stats.Words + curGame.curStats.Words
 	totalStats.Seconds = curGame.stats.Seconds + curGame.curStats.Seconds
 	totalStats.Errors = curGame.stats.Errors + curGame.curStats.Errors
+	totalStats.Wpm = totalStats.wpm()
 
 	template := []string{
 		"Total Stats",
 		"",
 		"Words: " + strconv.Itoa(totalStats.Words),
 		"Errors: " + strconv.Itoa(totalStats.Errors),
-		"WPM: " + strconv.Itoa(totalStats.wpm()),
+		"WPM: " + strconv.Itoa(totalStats.Wpm),
 		"",
 		"[Esc] to go back",
 		"[r] to reset all stats",
